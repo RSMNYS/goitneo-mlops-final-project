@@ -1,0 +1,41 @@
+# Additional Prometheus scrape configuration for inference service.
+# The kube-prometheus-stack already scrapes pods with prometheus.io annotations.
+# This file documents the expected annotations on inference-api pods:
+#
+#   prometheus.io/scrape: "true"
+#   prometheus.io/path: "/metrics"
+#   prometheus.io/port: "8080"
+#
+# These annotations are set in helm/values.yaml -> podAnnotations.
+#
+# To add this as an additional scrape config to kube-prometheus-stack,
+# update the Helm values:
+#
+# prometheus:
+#   prometheusSpec:
+#     additionalScrapeConfigs:
+#       - job_name: 'inference-api'
+#         kubernetes_sd_configs:
+#           - role: pod
+#             namespaces:
+#               names:
+#                 - serving
+#         relabel_configs:
+#           - action: keep
+#             source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+#             regex: "true"
+#           - action: replace
+#             source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
+#             target_label: __metrics_path__
+#             regex: (.+)
+#           - action: replace
+#             source_labels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]
+#             regex: ([^:]+)(?::\d+)?;(\d+)
+#             replacement: $1:$2
+#             target_label: __address__
+#           - action: replace
+#             source_labels: [__meta_kubernetes_namespace]
+#             target_label: namespace
+#           - action: replace
+#             source_labels: [__meta_kubernetes_pod_name]
+#             target_label: pod

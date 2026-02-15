@@ -1,0 +1,25 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: inference-api
+  namespace: infra-tools
+spec:
+  project: default
+
+  source:
+    repoURL: https://gitlab.com/sergij.rylskyj-group/aiops-quality-project.git
+    targetRevision: final-project
+    path: helm
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: serving
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+
+  revisionHistoryLimit: 3
